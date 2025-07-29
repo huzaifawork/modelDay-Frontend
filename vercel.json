@@ -1,19 +1,7 @@
 {
-  "version": 2,
-  "outputDirectory": "build/web",
   "functions": {
     "api/chat.js": {
       "maxDuration": 30
     }
-  },
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ]
+  }
 }
