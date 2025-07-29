@@ -8,7 +8,7 @@
     "dev": "vercel dev",
     "server": "node server.js",
     "build": "echo 'Using pre-built Flutter web files from build/web directory'",
-    "vercel-build": "echo 'Vercel build: Using existing Flutter build files' && ls -la build/web"
+    "vercel-build": "echo 'Vercel build: Using existing Flutter build files'"
   },
   "dependencies": {
     "openai": "^4.67.3",
@@ -22,8 +22,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/LuqmanKt98/ModelDay.git"
+    "url": "https://github.com/huzaifawork/modelDay-Frontend.git"
   },
-  "author": "LuqmanKt98",
+  "author": "huzaifawork",
   "license": "MIT"
 }
