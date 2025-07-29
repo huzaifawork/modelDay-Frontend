@@ -1,27 +1,45 @@
 import 'package:flutter/foundation.dart';
-// TEMPORARILY DISABLED FOR DEPLOYMENT
-// import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class OAuthConfigService {
-  // TEMPORARILY DISABLED FOR DEPLOYMENT - OAuth functionality commented out
+  // Google OAuth Client IDs - Now enabled with actual credentials
   static const String _webClientId =
-      'DISABLED_FOR_DEPLOYMENT'; // OAuth temporarily disabled
+      '373125623062-6tlqmnc91u973gtdivp9urfilorekb3e.apps.googleusercontent.com';
   static const String _androidClientId =
-      'DISABLED_FOR_DEPLOYMENT'; // OAuth temporarily disabled
+      '373125623062-dc783ca61dd535d5807437.apps.googleusercontent.com';
   static const String _iosClientId =
-      'DISABLED_FOR_DEPLOYMENT'; // OAuth temporarily disabled
+      '373125623062-c17c45344c8a067d807437.apps.googleusercontent.com';
 
-  // Manual OAuth Configuration - TEMPORARILY DISABLED
+  // Manual OAuth Configuration - Now enabled
   static const String manualOAuthClientId = _webClientId;
-  static const String manualOAuthClientSecret = 'DISABLED_FOR_DEPLOYMENT'; // OAuth temporarily disabled
+  static const String manualOAuthClientSecret =
+      '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'; // OAuth client secret
 
   // OAuth Endpoints
-  static const String authEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+  static const String authEndpoint =
+      'https://accounts.google.com/o/oauth2/v2/auth';
   static const String tokenEndpoint = 'https://oauth2.googleapis.com/token';
-  static const String userInfoEndpoint = 'https://www.googleapis.com/oauth2/v2/userinfo';
+  static const String userInfoEndpoint =
+      'https://www.googleapis.com/oauth2/v2/userinfo';
 
-  // Redirect URIs
-  static const String webRedirectUri = 'http://localhost:3000/__/auth/handler';
+  // Redirect URIs - Dynamic based on environment
+  static String getWebRedirectUri() {
+    if (kIsWeb) {
+      final currentUrl = Uri.base;
+      if (currentUrl.host == 'localhost' || currentUrl.host == '127.0.0.1') {
+        return 'http://localhost:3000/auth/callback';
+      } else if (currentUrl.host.contains('vercel.app')) {
+        return 'https://model-day-frontend.vercel.app/auth/callback';
+      } else {
+        // Fallback for other domains
+        return '${currentUrl.scheme}://${currentUrl.host}/auth/callback';
+      }
+    }
+    return 'http://localhost:3000/auth/callback'; // Fallback for non-web
+  }
+
+  static const String webRedirectUri =
+      'http://localhost:3000/auth/callback'; // Legacy - kept for compatibility
   static const String mobileRedirectUri = 'com.example.newFlutter://oauth';
 
   // OAuth Scopes
@@ -32,13 +50,11 @@ class OAuthConfigService {
     'https://www.googleapis.com/auth/calendar'
   ];
 
-  /// TEMPORARILY DISABLED FOR DEPLOYMENT - Get the appropriate Google Sign-In configuration for the current platform
-  static dynamic getGoogleSignInInstance() {
-    // OAUTH FUNCTIONALITY TEMPORARILY DISABLED FOR DEPLOYMENT
-    debugPrint('⚠️ OAuth temporarily disabled for deployment');
-    return null;
+  /// Get the appropriate Google Sign-In configuration for the current platform
+  static GoogleSignIn getGoogleSignInInstance() {
+    debugPrint(
+        '🔐 Initializing Google Sign-In for platform: ${kIsWeb ? 'web' : defaultTargetPlatform.name}');
 
-    /* COMMENTED OUT FOR DEPLOYMENT
     if (kIsWeb) {
       return GoogleSignIn(
         clientId: _webClientId,
@@ -64,7 +80,6 @@ class OAuthConfigService {
         // (google-services.json for Android, GoogleService-Info.plist for iOS)
       );
     }
-    */
   }
 
   /// Get client ID for the current platform
@@ -80,34 +95,22 @@ class OAuthConfigService {
     }
   }
 
-  /// TEMPORARILY DISABLED - Check if the current platform supports OAuth
+  /// Check if the current platform supports OAuth
   static bool isPlatformSupported() {
-    // OAUTH TEMPORARILY DISABLED FOR DEPLOYMENT
-    return false;
-
-    /* COMMENTED OUT FOR DEPLOYMENT
     return kIsWeb ||
         defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS;
-    */
   }
 
-  /// TEMPORARILY DISABLED - Get platform-specific OAuth configuration
+  /// Get platform-specific OAuth configuration
   static Map<String, dynamic> getPlatformConfig() {
     return {
       'platform': kIsWeb ? 'web' : defaultTargetPlatform.name,
-      'clientId': 'DISABLED_FOR_DEPLOYMENT',
-      'scopes': [],
-      'supported': false, // OAuth temporarily disabled
-    };
-
-    /* COMMENTED OUT FOR DEPLOYMENT
-    return {
-      'platform': kIsWeb ? 'web' : defaultTargetPlatform.name,
       'clientId': getClientId(),
-      'scopes': ['email', 'profile', 'openid'],
+      'scopes': oauthScopes,
       'supported': isPlatformSupported(),
+      'redirectUri':
+          getWebRedirectUri(), // Include dynamic redirect URI for debugging
     };
-    */
   }
 }

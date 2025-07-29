@@ -7,20 +7,37 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_auth_storage_service.dart';
 
 class ManualOAuthService {
-  // OAuth Configuration - These will be provided by the backend API
-  static const String _clientId = 'YOUR_GOOGLE_CLIENT_ID'; // Will be fetched from backend
-  static const String _clientSecret = 'YOUR_GOOGLE_CLIENT_SECRET'; // Only used server-side
-  
+  // OAuth Configuration - Now enabled with actual credentials
+  static const String _clientId =
+      '373125623062-6tlqmnc91u973gtdivp9urfilorekb3e.apps.googleusercontent.com'; // Web client ID
+  static const String _clientSecret =
+      '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'; // OAuth client secret
+
   // OAuth Endpoints
-  static const String _authEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+  static const String _authEndpoint =
+      'https://accounts.google.com/o/oauth2/v2/auth';
   static const String _tokenEndpoint = 'https://oauth2.googleapis.com/token';
-  static const String _userInfoEndpoint = 'https://www.googleapis.com/oauth2/v2/userinfo';
-  
-  // Redirect URIs - must match exactly what's configured in Google Cloud Console
-  static const String _webRedirectUri = 'http://localhost:3000/auth/callback';
+  static const String _userInfoEndpoint =
+      'https://www.googleapis.com/oauth2/v2/userinfo';
+
+  // Redirect URIs - Dynamic based on environment
+  static String _getWebRedirectUri() {
+    if (kIsWeb) {
+      final currentUrl = Uri.base;
+      if (currentUrl.host == 'localhost' || currentUrl.host == '127.0.0.1') {
+        return 'http://localhost:3000/auth/callback';
+      } else if (currentUrl.host.contains('vercel.app')) {
+        return 'https://model-day-frontend.vercel.app/auth/callback';
+      } else {
+        // Fallback for other domains
+        return '${currentUrl.scheme}://${currentUrl.host}/auth/callback';
+      }
+    }
+    return 'http://localhost:3000/auth/callback'; // Fallback for non-web
+  }
   // Mobile redirect URI for future implementation
   // static const String _mobileRedirectUri = 'com.example.newFlutter://oauth';
-  
+
   // Scopes
   static const List<String> _scopes = [
     'openid',
@@ -29,15 +46,16 @@ class ManualOAuthService {
     'https://www.googleapis.com/auth/calendar'
   ];
 
-  static final FirebaseAuthStorageService _storageService = FirebaseAuthStorageService();
+  static final FirebaseAuthStorageService _storageService =
+      FirebaseAuthStorageService();
 
   /// Generate a secure random string for state parameter
   static String _generateRandomString(int length) {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random.secure();
     return String.fromCharCodes(Iterable.generate(
-      length, (_) => chars.codeUnitAt(random.nextInt(chars.length))
-    ));
+        length, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
   }
 
   /// Generate PKCE code verifier and challenge
@@ -82,24 +100,25 @@ class ManualOAuthService {
   static Future<Map<String, dynamic>?> signInWeb() async {
     try {
       debugPrint('🌐 Starting web OAuth flow...');
-      
+
       final state = _generateRandomString(32);
       final pkce = _generatePKCE();
-      
+
       // Store state and PKCE for verification
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('oauth_state', state);
       await prefs.setString('oauth_code_verifier', pkce['code_verifier']!);
-      
+
+      final redirectUri = _getWebRedirectUri();
       final authUrl = _buildAuthUrl(
-        redirectUri: _webRedirectUri,
+        redirectUri: redirectUri,
         state: state,
         codeChallenge: pkce['code_challenge'],
         codeChallengeMethod: pkce['code_challenge_method'],
       );
 
       debugPrint('🔗 Auth URL: $authUrl');
-      debugPrint('🔗 Redirect URI: $_webRedirectUri');
+      debugPrint('🔗 Redirect URI: $redirectUri');
       debugPrint('🔗 Client ID: $_clientId');
 
       // Copy URL to clipboard for manual testing if needed
@@ -137,26 +156,26 @@ class ManualOAuthService {
   }) async {
     try {
       debugPrint('🔄 Handling OAuth callback...');
-      
+
       // Verify state parameter
       final prefs = await SharedPreferences.getInstance();
       final storedState = prefs.getString('oauth_state');
       if (storedState != state) {
         throw Exception('Invalid state parameter');
       }
-      
+
       final codeVerifier = prefs.getString('oauth_code_verifier');
-      
+
       // Exchange authorization code for tokens
       final tokenData = await _exchangeCodeForTokens(
         code: code,
-        redirectUri: _webRedirectUri,
+        redirectUri: _getWebRedirectUri(),
         codeVerifier: codeVerifier,
       );
-      
+
       // Get user info
       final userInfo = await _getUserInfo(tokenData['access_token']);
-      
+
       // Store user data in Firebase Storage
       final userData = {
         'id': userInfo['id'],
@@ -167,16 +186,15 @@ class ManualOAuthService {
         'tokens': tokenData,
         'last_login': DateTime.now().toIso8601String(),
       };
-      
+
       await _storageService.storeUserData(userInfo['id'], userData);
-      
+
       // Clean up stored state
       await prefs.remove('oauth_state');
       await prefs.remove('oauth_code_verifier');
-      
+
       debugPrint('✅ OAuth callback handled successfully');
       return userData;
-      
     } catch (e) {
       debugPrint('❌ OAuth callback error: $e');
       rethrow;
@@ -191,7 +209,7 @@ class ManualOAuthService {
   }) async {
     try {
       debugPrint('🔄 Exchanging code for tokens...');
-      
+
       final body = {
         'client_id': _clientId,
         'client_secret': _clientSecret,
@@ -199,17 +217,17 @@ class ManualOAuthService {
         'grant_type': 'authorization_code',
         'redirect_uri': redirectUri,
       };
-      
+
       if (codeVerifier != null) {
         body['code_verifier'] = codeVerifier;
       }
-      
+
       final response = await http.post(
         Uri.parse(_tokenEndpoint),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: body,
       );
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         debugPrint('✅ Token exchange successful');
@@ -228,12 +246,12 @@ class ManualOAuthService {
   static Future<Map<String, dynamic>> _getUserInfo(String accessToken) async {
     try {
       debugPrint('👤 Getting user info...');
-      
+
       final response = await http.get(
         Uri.parse(_userInfoEndpoint),
         headers: {'Authorization': 'Bearer $accessToken'},
       );
-      
+
       if (response.statusCode == 200) {
         final userInfo = json.decode(response.body);
         debugPrint('✅ User info retrieved: ${userInfo['email']}');
@@ -251,7 +269,7 @@ class ManualOAuthService {
   static Future<Map<String, dynamic>?> refreshToken(String refreshToken) async {
     try {
       debugPrint('🔄 Refreshing access token...');
-      
+
       final response = await http.post(
         Uri.parse(_tokenEndpoint),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -262,7 +280,7 @@ class ManualOAuthService {
           'grant_type': 'refresh_token',
         },
       );
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         debugPrint('✅ Token refresh successful');
@@ -282,13 +300,13 @@ class ManualOAuthService {
     try {
       debugPrint('👋 Signing out user: $userId');
       await _storageService.clearUserData(userId);
-      
+
       // Clear local storage
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('oauth_state');
       await prefs.remove('oauth_code_verifier');
       await prefs.remove('current_user_id');
-      
+
       debugPrint('✅ User signed out successfully');
     } catch (e) {
       debugPrint('❌ Sign out error: $e');
@@ -301,11 +319,11 @@ class ManualOAuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('current_user_id');
-      
+
       if (userId != null) {
         return await _storageService.getUserData(userId);
       }
-      
+
       return null;
     } catch (e) {
       debugPrint('❌ Get current user error: $e');
