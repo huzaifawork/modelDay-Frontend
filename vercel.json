@@ -1,7 +1,7 @@
 {
-  "buildCommand": "flutter build web --release --base-href=/",
+  "buildCommand": null,
   "outputDirectory": "build/web",
-  "installCommand": "flutter pub get",
+  "installCommand": null,
   "framework": null,
   "rewrites": [
     {

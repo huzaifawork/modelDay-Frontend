@@ -5,9 +5,12 @@
 .pub/
 
 # Exclude source code since we're using pre-built assets
-# lib/
-# test/
-# web/
+lib/
+test/
+web/
+
+# Keep the build directory
+!build/
 
 # Flutter config files (not needed for static deployment)
 pubspec.yaml
