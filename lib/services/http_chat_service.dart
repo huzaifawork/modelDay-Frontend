@@ -24,12 +24,12 @@ class HttpChatService {
         'context': userContext,
       };
 
-      debugPrint('🤖 Making HTTP request to $_baseUrl/chat');
+      debugPrint('🤖 Making HTTP request to $_baseUrl/api/chat');
 
       // Make HTTP POST request to backend API
       final response = await http
           .post(
-            Uri.parse('$_baseUrl/chat'),
+            Uri.parse('$_baseUrl/api/chat'),
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
