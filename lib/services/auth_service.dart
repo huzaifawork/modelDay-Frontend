@@ -333,6 +333,7 @@ class AuthService extends ChangeNotifier {
       _loading = true;
       notifyListeners();
 
+      debugPrint('🚀 OAuth ENABLED - Starting Google Sign-In - Build v3');
       debugPrint(
           '🔍 OAuth Platform Config: ${OAuthConfigService.getPlatformConfig()}');
 

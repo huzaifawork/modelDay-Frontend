@@ -53,7 +53,8 @@ class OAuthConfigService {
   /// Get the appropriate Google Sign-In configuration for the current platform
   static GoogleSignIn getGoogleSignInInstance() {
     debugPrint(
-        '🔐 Initializing Google Sign-In for platform: ${kIsWeb ? 'web' : defaultTargetPlatform.name}');
+        '🔐 OAuth ENABLED - Initializing Google Sign-In for platform: ${kIsWeb ? 'web' : defaultTargetPlatform.name}');
+    debugPrint('✅ OAuth Status: FULLY ENABLED - Build v3');
 
     if (kIsWeb) {
       return GoogleSignIn(
