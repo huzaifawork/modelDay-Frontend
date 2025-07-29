@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class OAuthConfigService {
-  // Google OAuth Client IDs - Fully enabled with actual credentials - Build v2
+  // Google OAuth Client IDs - Fully enabled with actual credentials - Fresh Build v4
   static const String _webClientId =
       '373125623062-6tlqmnc91u973gtdivp9urfilorekb3e.apps.googleusercontent.com';
   static const String _androidClientId =
