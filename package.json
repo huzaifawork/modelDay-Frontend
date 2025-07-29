@@ -1,0 +1,29 @@
+{
+  "name": "model-day-flutter",
+  "version": "1.0.0",
+  "description": "Model Day - Professional Modeling Career Manager (Flutter Web App with Node.js API)",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "vercel dev",
+    "server": "node server.js",
+    "build": "echo 'Using pre-built Flutter web files from build/web directory'",
+    "vercel-build": "echo 'Vercel build: Using existing Flutter build files' && ls -la build/web"
+  },
+  "dependencies": {
+    "openai": "^4.67.3",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2",
+    "express": "^4.21.2",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LuqmanKt98/ModelDay.git"
+  },
+  "author": "LuqmanKt98",
+  "license": "MIT"
+}
