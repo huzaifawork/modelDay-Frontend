@@ -5,7 +5,7 @@ import 'context_service.dart';
 
 class HttpChatService {
   static const String _baseUrl =
-      'https://model-day-backend-two.vercel.app'; // External backend URL
+      'https://modelday-backend.vercel.app'; // External backend URL
   static const Duration _timeout = Duration(seconds: 30);
 
   /// Send a chat message and get AI response from backend API
