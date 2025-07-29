@@ -4,18 +4,20 @@ import 'package:http/http.dart' as http;
 import 'context_service.dart';
 
 class HttpChatService {
-  static const String _baseUrl = '/api'; // Relative URL for Vercel deployment
+  static const String _baseUrl =
+      'https://model-day-backend-two.vercel.app/api'; // External backend URL
   static const Duration _timeout = Duration(seconds: 30);
 
   /// Send a chat message and get AI response from backend API
   static Future<String> sendChatMessage(String userMessage) async {
     try {
-      debugPrint('🤖 HttpChatService.sendChatMessage() - Sending message: $userMessage');
-      
+      debugPrint(
+          '🤖 HttpChatService.sendChatMessage() - Sending message: $userMessage');
+
       // Build user context using existing ContextService
       debugPrint('🤖 Building user context...');
       final userContext = await ContextService.buildUserContext();
-      
+
       // Prepare request body
       final requestBody = {
         'message': userMessage,
@@ -23,7 +25,7 @@ class HttpChatService {
       };
 
       debugPrint('🤖 Making HTTP request to $_baseUrl/chat');
-      
+
       // Make HTTP POST request to backend API
       final response = await http
           .post(
@@ -41,10 +43,11 @@ class HttpChatService {
       // Handle successful response
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        
+
         if (responseData['response'] != null) {
           final aiResponse = responseData['response'] as String;
-          debugPrint('✅ AI response received: ${aiResponse.substring(0, aiResponse.length > 100 ? 100 : aiResponse.length)}...');
+          debugPrint(
+              '✅ AI response received: ${aiResponse.substring(0, aiResponse.length > 100 ? 100 : aiResponse.length)}...');
           return aiResponse;
         } else {
           throw Exception('Invalid response format: missing response field');
@@ -55,9 +58,9 @@ class HttpChatService {
       if (response.statusCode >= 400) {
         final errorData = json.decode(response.body);
         final errorMessage = errorData['message'] ?? 'Unknown error occurred';
-        
+
         debugPrint('❌ API Error (${response.statusCode}): $errorMessage');
-        
+
         // Return user-friendly error messages based on status code
         switch (response.statusCode) {
           case 400:
@@ -75,20 +78,22 @@ class HttpChatService {
 
       // Unexpected status code
       throw Exception('Unexpected response status: ${response.statusCode}');
-
     } catch (e) {
       debugPrint('❌ HttpChatService Error: $e');
 
       // Handle specific error types
-      if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('timeout')) {
         return 'The request is taking longer than expected. Please try again.';
       }
-      
-      if (e.toString().contains('SocketException') || e.toString().contains('network')) {
+
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('network')) {
         return 'I\'m having trouble connecting to my AI service. Please check your internet connection and try again.';
       }
-      
-      if (e.toString().contains('FormatException') || e.toString().contains('json')) {
+
+      if (e.toString().contains('FormatException') ||
+          e.toString().contains('json')) {
         return 'I received an unexpected response. Please try again.';
       }
 
@@ -101,7 +106,7 @@ class HttpChatService {
   static Future<bool> testConnection() async {
     try {
       debugPrint('🤖 Testing backend API connection...');
-      
+
       final response = await http
           .post(
             Uri.parse('$_baseUrl/chat'),
@@ -117,8 +122,10 @@ class HttpChatService {
           .timeout(const Duration(seconds: 10));
 
       final isConnected = response.statusCode == 200;
-      debugPrint(isConnected ? '✅ Backend API connection successful' : '❌ Backend API connection failed');
-      
+      debugPrint(isConnected
+          ? '✅ Backend API connection successful'
+          : '❌ Backend API connection failed');
+
       return isConnected;
     } catch (e) {
       debugPrint('❌ Backend API connection test failed: $e');
@@ -146,11 +153,11 @@ class HttpChatService {
     if (message.trim().isEmpty) {
       return false;
     }
-    
+
     if (message.length > 2000) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -159,11 +166,11 @@ class HttpChatService {
     if (message.trim().isEmpty) {
       return 'Please enter a message.';
     }
-    
+
     if (message.length > 2000) {
       return 'Message is too long. Please keep it under 2000 characters.';
     }
-    
+
     return '';
   }
 }
