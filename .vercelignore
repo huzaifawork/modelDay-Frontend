@@ -4,10 +4,10 @@
 .pub-cache/
 .pub/
 
-# Source code (not needed for static deployment)
-lib/
-test/
-web/
+# Exclude source code since we're using pre-built assets
+# lib/
+# test/
+# web/
 
 # Flutter config files (not needed for static deployment)
 pubspec.yaml
